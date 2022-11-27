@@ -17,9 +17,9 @@ public class StudentService {
     }
 
     public void addStudent(Student student) {
-        Optional<Student> studentByEmail = studentRepository.findStudentByEmail(student.getEmail());
+        boolean existsStudentByEmail = studentRepository.existsStudentByEmail(student.getEmail());
 
-        if (studentByEmail.isPresent()){
+        if (existsStudentByEmail){
             throw new BadRequestException("Email Already Taken");
         }
 
@@ -27,8 +27,10 @@ public class StudentService {
     }
 
     public void deleteStudent(Long studentId) {
-        studentRepository.findById(studentId)
-                .ifPresentOrElse(studentRepository::delete,
-                        () -> {throw new StudentNotFoundException("Student With Id: " + studentId +" Not Found");});
+        if(!studentRepository.existsById(studentId)){
+            throw new StudentNotFoundException("Student With Id: " + studentId +" Not Found");
+        }
+
+        studentRepository.deleteById(studentId);
     }
 }
